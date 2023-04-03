@@ -20,18 +20,21 @@ def update_stack_and_apply(stack_id,autoscale):
     stack_variables.update(new_var)
 
     print(f"Updating variable of the stack with OCID {stack_id}")
-    resource_manager_client.update_stack(
-        stack_id=stack_id,
-        update_stack_details=oci.resource_manager.models.UpdateStackDetails(
-            variables=stack_variables))
-
-    resource_manager_client.create_job(
-        create_job_details=oci.resource_manager.models.CreateJobDetails(
+    if ci_count > 0:
+        resource_manager_client.update_stack(
             stack_id=stack_id,
-            job_operation_details=oci.resource_manager.models.CreateApplyJobOperationDetails(
-                operation="APPLY",
-                execution_plan_strategy="AUTO_APPROVED")))
-    return f"Updated stack and applied job with updated variable"
+            update_stack_details=oci.resource_manager.models.UpdateStackDetails(
+                variables=stack_variables))
+
+        resource_manager_client.create_job(
+            create_job_details=oci.resource_manager.models.CreateJobDetails(
+                stack_id=stack_id,
+                job_operation_details=oci.resource_manager.models.CreateApplyJobOperationDetails(
+                    operation="APPLY",
+                    execution_plan_strategy="AUTO_APPROVED")))
+        return f"Updated stack and applied job with updated variable"
+    else:
+        return f"Cant go below one instance"
 
 
 def handler(ctx, data: io.BytesIO=None):
