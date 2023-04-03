@@ -5,7 +5,7 @@ from fdk import response
 signer = oci.auth.signers.get_resource_principals_signer()
 resource_manager_client = oci.resource_manager.ResourceManagerClient(config={},signer=signer)
 
-def update_stack_and_apply(stack_id,autoscale):
+def update_stack_and_apply(stack_id,autoscale,max_ci,min_ci):
 
     get_stack_response = resource_manager_client.get_stack(
         stack_id=stack_id)
@@ -20,7 +20,7 @@ def update_stack_and_apply(stack_id,autoscale):
     stack_variables.update(new_var)
 
     print(f"Updating variable of the stack with OCID {stack_id}")
-    if ci_count > 0:
+    if max_ci > ci_count > min_ci:
         resource_manager_client.update_stack(
             stack_id=stack_id,
             update_stack_details=oci.resource_manager.models.UpdateStackDetails(
@@ -41,6 +41,8 @@ def handler(ctx, data: io.BytesIO=None):
     alarm_msg = {}
     cfg = ctx.Config()
     stack_id=cfg['stack_id']
+    min_ci = cfg["min_ci"]
+    max_ci = cfg["max_ci"]
 
     try:
         alarm_msg = json.loads(data.getvalue())
@@ -51,11 +53,11 @@ def handler(ctx, data: io.BytesIO=None):
 
     if alarm_msg["type"] == "OK_TO_FIRING" and "CIalarm" in alarm_msg["title"]:
         autoscale="scaleout"
-        func_response = update_stack_and_apply(stack_id,autoscale)
+        func_response = update_stack_and_apply(stack_id,autoscale,max_ci,min_cin)
         print("INFO: ", func_response, flush=True)
     elif alarm_msg["type"] == "FIRING_TO_OK" and "CIalarm" in alarm_msg["title"]:
         autoscale="scalein"
-        func_response = update_stack_and_apply(stack_id,autoscale)
+        func_response = update_stack_and_apply(stack_id,autoscale,max_ci,min_ci)
         print("INFO: ", func_response, flush=True)
     else:
         print("Nothing to do")
