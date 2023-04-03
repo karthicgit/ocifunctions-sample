@@ -5,14 +5,18 @@ from fdk import response
 signer = oci.auth.signers.get_resource_principals_signer()
 resource_manager_client = oci.resource_manager.ResourceManagerClient(config={},signer=signer)
 
-def update_stack_and_apply(stack_id):
+def update_stack_and_apply(stack_id,autoscale):
 
     get_stack_response = resource_manager_client.get_stack(
         stack_id=stack_id)
     stack_variables=get_stack_response.data.variables
-    #existing_var=stack_variables['<variablekey>']
+    existing_var=stack_variables['ci_count']
     #Pass key value pair to be added/modified to the ORM variables
-    new_var={'key': 'new_value'}
+    if autoscale == "scaleout":
+        ci_count=int(existing_var) + 1
+    else:
+        ci_count=int(existing_var) - 1
+    new_var={'ci_count': ci_count}
     stack_variables.update(new_var)
 
     print(f"Updating variable of the stack with OCID {stack_id}")
@@ -43,10 +47,12 @@ def handler(ctx, data: io.BytesIO=None):
         print(str(ex), flush=True)
 
     if alarm_msg["type"] == "OK_TO_FIRING" and "CIalarm" in alarm_msg["title"]:
-        func_response = update_stack_and_apply(stack_id)
+        autoscale="scaleout"
+        func_response = update_stack_and_apply(stack_id,autoscale)
         print("INFO: ", func_response, flush=True)
     elif alarm_msg["type"] == "FIRING_TO_OK" and "CIalarm" in alarm_msg["title"]:
-        func_response = update_stack_and_apply(stack_id)
+        autoscale="scalein"
+        func_response = update_stack_and_apply(stack_id,autoscale)
         print("INFO: ", func_response, flush=True)
     else:
         print("Nothing to do")
