@@ -42,11 +42,13 @@ def handler(ctx, data: io.BytesIO=None):
     except (Exception, ValueError) as ex:
         print(str(ex), flush=True)
 
-    if alarm_msg["type"] == "OK_TO_FIRING" and "CIalarm" in alarm_msg["title"]:
-        func_response = update_stack_and_apply(stack_id)
+    if alarm_msg["status"] == "FIRING" and alarm_msg['type'] in ["REPEAT","OK_TO_FIRING"] and "CIscaleout" in alarm_msg["title"]:
+        autoscale="scaleout"
+        func_response = update_stack_and_apply(stack_id,autoscale,max_ci,min_ci)
         print("INFO: ", func_response, flush=True)
-    elif alarm_msg["type"] == "FIRING_TO_OK" and "CIalarm" in alarm_msg["title"]:
-        func_response = update_stack_and_apply(stack_id)
+    elif alarm_msg["status"] == "FIRING" and alarm_msg['type'] in ["REPEAT","OK_TO_FIRING"] and "CIscalein" in alarm_msg["title"]:
+        autoscale="scalein"
+        func_response = update_stack_and_apply(stack_id,autoscale,max_ci,min_ci)
         print("INFO: ", func_response, flush=True)
     else:
         print("Nothing to do")
