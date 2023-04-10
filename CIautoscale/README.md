@@ -12,7 +12,7 @@ Once the OCI function is created configure the function with the below variables
     log-level(Function logging level Values allowed are 10,20,30,40,50).
     
     
- This function gets triggered by OCI alarm notification.Belowq repo available to create these using terraform.
+ This function gets triggered by OCI alarm notification.Below repo available to create these using terraform.
  https://github.com/karthicgit/Terraformoci/tree/main/NotificationAlarm. 
  
  You may also create the Topic ,Subsription and Alarm using OCI console as well. 
