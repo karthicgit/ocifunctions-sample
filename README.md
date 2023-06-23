@@ -1,2 +1,3 @@
 Python samples for OCI functions.
-[![Open in Code Editor](https://raw.githubusercontent.com/oracle-devrel/oci-code-editor-samples/main/images/open-in-code-editor.png)](https://cloud.oracle.com/?region=home&cs_repo_url=https://github.com/karthicgit/ocifunctions-sample.git)
+
+[![Open in Cloud Shell](https://oci-resourcemanager-plugin.plugins.oci.oraclecloud.com/latest/deploy-to-oracle-cloud.svg)](https://cloud.oracle.com/?region=home&cs_repo_url=https://github.com/karthicgit/ocifunctions-sample.git)
