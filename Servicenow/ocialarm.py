@@ -80,13 +80,16 @@ def handler(ctx, data: io.BytesIO = None):
         snow_short_desc = body.get("title")
         snow_desc = body.get("body")
         alarm_type = body.get("type")
+        snow_comments = body["alarmMetaData"][0]["dimensions"][0]["resourceDisplayName"]
 
         snow_message_json = {
             "urgency" : snow_severity,
             "impact" : snow_severity,
             "short_description": snow_short_desc,
             "description": snow_desc,
-            "caller_id" : "OCI"
+            "caller_id" : "OCI",
+            "comments": f'Incident created for resource {snow_comments}',
+            "assignment_group": "Operations"
         }
 
         access_token = get_new_token(snow_url,client_id,client_secret,refresh_token)
