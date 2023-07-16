@@ -78,9 +78,10 @@ def handler(ctx, data: io.BytesIO = None):
         snow_short_desc = body.get("title")
         snow_desc = body.get("body")
         alarm_type = body.get("type")
-        snow_comments = body["alarmMetaData"][0]["dimensions"][0]["resourceDisplayName"]
+        
 
         if alarm_type in ["OK_TO_FIRING"]:
+            snow_comments = body["alarmMetaData"][0]["dimensions"][0]["resourceDisplayName"]
             snow_message_json = {
                 "urgency" : snow_severity,
                 "impact" : snow_severity,
