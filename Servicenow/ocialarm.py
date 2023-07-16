@@ -5,7 +5,6 @@
 import io
 import oci
 import base64
-
 import sys
 import requests
 import json
@@ -48,11 +47,11 @@ def get_new_token(snow_url,client_id,client_secret,refresh_token):
         print("Failed to obtain token from the OAuth 2.0 server")
         sys.exit(1)
 
-    print("Successfully obtained a new token")
     tokens = json.loads(token_response.text)
     access_token = tokens['access_token']
     return f'Bearer {access_token}'
 
+#function to map OCI alarm severity with servicenow
 def servicenow_severity(severity):
         if severity == "CRITICAL":
             return "1"
@@ -62,7 +61,6 @@ def servicenow_severity(severity):
             return "3"
         elif severity == "INFO":
             return "4"
-
 
 def handler(ctx, data: io.BytesIO = None):
     cfg = dict(ctx.Config())
@@ -82,26 +80,27 @@ def handler(ctx, data: io.BytesIO = None):
         alarm_type = body.get("type")
         snow_comments = body["alarmMetaData"][0]["dimensions"][0]["resourceDisplayName"]
 
-        snow_message_json = {
-            "urgency" : snow_severity,
-            "impact" : snow_severity,
-            "short_description": snow_short_desc,
-            "description": snow_desc,
-            "caller_id" : "OCI",
-            "comments": f'Incident created for resource {snow_comments}',
-            "assignment_group": "Operations"
-        }
-
-        access_token = get_new_token(snow_url,client_id,client_secret,refresh_token)
-
-        snow_incident_url = f'{snow_url}/api/now/table/incident'
-        headers = {
-            'Authorization' : access_token
-        }
         if alarm_type in ["OK_TO_FIRING"]:
+            snow_message_json = {
+                "urgency" : snow_severity,
+                "impact" : snow_severity,
+                "short_description": snow_short_desc,
+                "description": snow_desc,
+                "caller_id" : "OCI",
+                "comments": f'Incident created for resource {snow_comments}',
+                "assignment_group": "Operations"
+            }
+
+            access_token = get_new_token(snow_url,client_id,client_secret,refresh_token)
+
+            snow_incident_url = f'{snow_url}/api/now/table/incident'
+            headers = {
+                'Authorization' : access_token
+            }
+
             response_incident = requests.post(snow_incident_url, headers=headers, json=snow_message_json)
             logging.getLogger().info("Response Code: " + str(response_incident.status_code))
         else:
-            print("Alarm type is not OK_TO_FIRING")
+            print("Alarm type is not in OK_TO_FIRING state")
     except (Exception, ValueError) as ex:
         print(ex)
