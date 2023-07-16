@@ -45,7 +45,7 @@ def get_new_token(snow_url,client_id,client_secret,refresh_token):
         print(auth_exception)
 
     if token_response.status_code !=200:
-        print("Failed to obtain token from the OAuth 2.0 server", file=sys.stderr)
+        print("Failed to obtain token from the OAuth 2.0 server")
         sys.exit(1)
 
     print("Successfully obtained a new token")
