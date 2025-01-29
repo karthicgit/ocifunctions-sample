@@ -6,8 +6,7 @@ specifically for creating data ingestion jobs.
 """
 
 import io
-from oci import auth
-from oci import generative_ai_agent
+import oci
 
 
 def create_ingestion_job(compartment_ocid: str, datasource_ocid: str) -> None:
@@ -23,13 +22,13 @@ def create_ingestion_job(compartment_ocid: str, datasource_ocid: str) -> None:
     """
 
     # Initialize the resource principals signer
-    signer = auth.signers.get_resource_principals_signer()
+    signer = oci.auth.signers.get_resource_principals_signer()
 
     # Create a client instance for the Generative AI Agent service
-    generative_ai_agent_client = generative_ai_agent.GenerativeAiAgentClient({}, signer=signer)
+    generative_ai_agent_client = oci.generative_ai_agent.GenerativeAiAgentClient({}, signer=signer)
 
     # Define the details for the new ingestion job
-    create_data_ingestion_job_details = generative_ai_agent.models.CreateDataIngestionJobDetails(
+    create_data_ingestion_job_details = oci.generative_ai_agent.models.CreateDataIngestionJobDetails(
         data_source_id=datasource_ocid,
         compartment_id=compartment_ocid,
         description="Update Object Store data source"
