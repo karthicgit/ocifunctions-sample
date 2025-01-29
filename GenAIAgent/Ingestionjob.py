@@ -6,7 +6,6 @@ specifically for creating data ingestion jobs.
 """
 
 import io
-import oci
 from oci import auth
 from oci import generative_ai_agent
 
