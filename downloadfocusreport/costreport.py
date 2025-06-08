@@ -12,7 +12,6 @@ def send_to_bucket(destination_bucket):
     reporting_namespace = 'bling'
     prefix_file = f"FOCUS Reports/{formatted_yesterday}"
 
-
     # Get the list of reports
     signer = oci.auth.signers.get_resource_principals_signer()
     object_storage = oci.object_storage.ObjectStorageClient({},signer=signer)
@@ -27,23 +26,26 @@ def send_to_bucket(destination_bucket):
         print('Found file ' + o.name,flush=True)
         object_details = object_storage.get_object(reporting_namespace, reporting_bucket, o.name)
 
-        # Decompress the GZIP file content
-        with gzip.GzipFile(fileobj=BytesIO(object_details.data.content)) as f:
-            decompressed_content = f.read()
-
-        # Upload the decompressed content to the destination bucket
         filename = pathlib.Path(o.name).stem
         formatted_filename = f"FOCUS_{csv_date_format}_{filename}"
-        object_storage.put_object(destination_namespace, destination_bucket_name,
-                                                        formatted_filename, decompressed_content)
-
+        try:
+            # Check if the object already exists in the destination bucket
+            object_storage.head_object(destination_namespace, destination_bucket_name, formatted_filename)
+            print(f"Object {formatted_filename} already exists. Skipping...",flush=True)
+        except oci.exceptions.ServiceError as e:
+            if e.status == 404:
+                # Decompress the GZIP file content
+                with gzip.GzipFile(fileobj=BytesIO(object_details.data.content)) as f:
+                    decompressed_content = f.read()
+                # Object does not exist, upload it
+                object_storage.put_object(destination_namespace, destination_bucket_name, formatted_filename, decompressed_content)
+                print(f"Uploaded {formatted_filename}",flush=True)
+            else:
+                raise
 
 def handler(ctx, data: BytesIO = None):
     cfg = dict(ctx.Config())
 
     # fetch details from function config
     bucket = cfg['bucket']
-    try:
-        send_to_bucket(bucket)
-    except (Exception, ValueError) as ex:
-        print(ex,flush=True)
+    send_to_bucket(bucket)
