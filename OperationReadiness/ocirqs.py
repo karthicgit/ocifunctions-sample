@@ -1,6 +1,6 @@
-import oci
 import threading
 from typing import Dict
+import oci
 
 # Define the OCI configuration
 config = oci.config.from_file()
