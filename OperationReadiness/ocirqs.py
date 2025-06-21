@@ -8,7 +8,7 @@ config = oci.config.from_file()
 # Initialize the OCI Resource Search client
 search_client = oci.resource_search.ResourceSearchClient(config)
 
-# Define the search queries
+# Define the search queries.Add the queries you want to run here.
 search_queries = {
     "Alarms": "query alarm resources where lifecycleState = 'ACTIVE'",
     "Budget": "query budget resources where lifecycleState = 'ACTIVE'",
